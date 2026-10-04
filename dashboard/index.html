@@ -3,279 +3,623 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TurbineGuard &bull; Wind Turbine Controller Validation Platform</title>
+    <title>TurbineGuard™ &bull; SCADA Wind Turbine Control &amp; Validation Center</title>
     <link rel="stylesheet" href="dashboard.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
-    <div class="app-container">
-        <!-- Top Navbar -->
-        <header class="navbar">
-            <div class="nav-brand">
-                <div class="brand-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                    </svg>
+<body class="scada-theme">
+    <!-- Top System Header & SCADA Status Bar -->
+    <header class="scada-navbar">
+        <div class="brand-cluster">
+            <div class="scada-logo-hex">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <polygon points="12 2 2 7 2 17 12 22 22 17 22 7 12 2"></polygon>
+                    <line x1="12" y1="2" x2="12" y2="22"></line>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                </svg>
+            </div>
+            <div>
+                <div class="brand-title">
+                    <span class="brand-name">TURBINEGUARD</span>
+                    <span class="brand-edition">SG-2.5MW &bull; SCADA MISSION CONTROL</span>
                 </div>
-                <div class="brand-text">
-                    <h1>TurbineGuard <span class="badge-tag">HIL / SIM V1.0</span></h1>
-                    <p class="subtitle">Wind Turbine Controller Validation &amp; Automated Verification Platform</p>
+                <div class="brand-meta">
+                    <span>UNIT ID: WTG-BLR-04</span> &bull; 
+                    <span>CONTROLLER: V1.0.4 HIL-ACTIVE</span> &bull; 
+                    <span>SIEMENS GAMESA TECH VALIDATION</span>
                 </div>
             </div>
-            
-            <div class="nav-actions">
-                <div class="status-indicator">
-                    <span class="status-dot pulse" id="connectionDot"></span>
-                    <span id="connectionText">API: Online (20Hz)</span>
-                </div>
-                <div class="candidate-tag">
-                    <span>Portfolio Reference: Kumari Simran</span>
+        </div>
+
+        <!-- Master State & Alarm Bar -->
+        <div class="state-master-cluster">
+            <div class="master-status-card" id="masterStatusCard">
+                <span class="status-pulse-dot" id="masterStatusDot"></span>
+                <div>
+                    <div class="status-title-sub">CONTROLLER STATE</div>
+                    <div class="status-title-main" id="masterStateText">NORMAL (REGION 3)</div>
                 </div>
             </div>
-        </header>
+            <div class="alarm-banner" id="alarmBanner">
+                <span class="alarm-icon">⚠️</span>
+                <span class="alarm-text" id="alarmText">NO ACTIVE TRIPS &bull; SAFETY ENVELOPE SECURE</span>
+            </div>
+        </div>
 
-        <!-- Main Grid Layout -->
-        <main class="dashboard-grid">
-            <!-- Left Column: Turbine Plant & Live Gauges -->
-            <section class="card plant-card">
-                <div class="card-header">
-                    <h2>Live Turbine Dynamics</h2>
-                    <span class="state-pill state-normal" id="statePill">NORMAL</span>
+        <!-- Live Controls & Candidate Tag -->
+        <div class="scada-header-actions">
+            <div class="audio-toggle-btn" id="btnAudioToggle" title="Toggle SCADA Alarm Audio">
+                <span id="audioIcon">🔊</span>
+            </div>
+            <div class="emergency-slam-btn" id="btnEmergencySlam">
+                <span class="e-stop-icon">⚡</span>
+                <span>EMERGENCY STOP</span>
+            </div>
+            <div class="operator-profile">
+                <div class="operator-avatar">KS</div>
+                <div>
+                    <div class="op-name">Kumari Simran</div>
+                    <div class="op-role">Loads &amp; Controls QA Engineer</div>
                 </div>
+            </div>
+        </div>
+    </header>
 
-                <!-- Live Digital Gauges Grid -->
-                <div class="gauge-grid">
-                    <div class="gauge-card">
-                        <span class="gauge-label">Wind Inflow</span>
-                        <div class="gauge-value" id="valWind">11.5 <span class="unit">m/s</span></div>
-                        <div class="gauge-bar"><div class="fill" id="barWind" style="width: 46%;"></div></div>
-                    </div>
-                    <div class="gauge-card">
-                        <span class="gauge-label">Generator Speed</span>
-                        <div class="gauge-value" id="valGenSpeed">1498 <span class="unit">RPM</span></div>
-                        <div class="gauge-bar"><div class="fill green" id="barGenSpeed" style="width: 86%;"></div></div>
-                    </div>
-                    <div class="gauge-card">
-                        <span class="gauge-label">Blade Pitch Angle</span>
-                        <div class="gauge-value" id="valPitch">2.4 <span class="unit">&deg;</span></div>
-                        <div class="gauge-bar"><div class="fill yellow" id="barPitch" style="width: 5%;"></div></div>
-                    </div>
-                    <div class="gauge-card">
-                        <span class="gauge-label">Electrical Power</span>
-                        <div class="gauge-value" id="valPower">2485 <span class="unit">kW</span></div>
-                        <div class="gauge-bar"><div class="fill blue" id="barPower" style="width: 99%;"></div></div>
-                    </div>
-                    <div class="gauge-card">
-                        <span class="gauge-label">Generator Temp</span>
-                        <div class="gauge-value" id="valTemp">68.5 <span class="unit">&deg;C</span></div>
-                        <div class="gauge-bar"><div class="fill" id="barTemp" style="width: 68%;"></div></div>
-                    </div>
-                    <div class="gauge-card">
-                        <span class="gauge-label">Nacelle Vibration</span>
-                        <div class="gauge-value" id="valVib">1.15 <span class="unit">mm/s</span></div>
-                        <div class="gauge-bar"><div class="fill green" id="barVib" style="width: 20%;"></div></div>
-                    </div>
-                </div>
+    <!-- Navigation Tabs -->
+    <nav class="scada-tabs">
+        <button class="tab-btn active" data-tab="tab-overview">
+            <span class="tab-icon">📊</span> Turbine Overview &amp; Live Telemetry
+        </button>
+        <button class="tab-btn" data-tab="tab-faults">
+            <span class="tab-icon">⚡</span> Fault Injection &amp; HIL Testing
+        </button>
+        <button class="tab-btn" data-tab="tab-validation">
+            <span class="tab-icon">🛡️</span> Formal Requirements Validation (12 REQs)
+        </button>
+        <button class="tab-btn" data-tab="tab-oscilloscope">
+            <span class="tab-icon">📈</span> High-Speed Telemetry Oscilloscope
+        </button>
+        <button class="tab-btn" data-tab="tab-reports">
+            <span class="tab-icon">📄</span> Engineering Reports &amp; Data Export
+        </button>
+    </nav>
 
-                <!-- Real-time Canvas Graph -->
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <span>Speed (RPM) &amp; Blade Pitch (&deg;) Live Response</span>
-                        <div class="chart-legend">
-                            <span class="leg-item"><span class="leg-dot green"></span> Gen RPM</span>
-                            <span class="leg-item"><span class="leg-dot yellow"></span> Pitch Angle</span>
-                            <span class="leg-item"><span class="leg-dot red"></span> Trip (1725)</span>
-                        </div>
-                    </div>
-                    <canvas id="telemetryCanvas" width="580" height="200"></canvas>
-                </div>
-
-                <!-- Simulation Control Toolbar -->
-                <div class="sim-toolbar">
-                    <select id="windScenarioSelect" class="form-select">
-                        <option value="constant">Constant Rated Wind (11.5 m/s)</option>
-                        <option value="step">Step Wind Change (10 &rarr; 15 m/s)</option>
-                        <option value="gust">Extreme Operating Gust (IEC EOG)</option>
-                        <option value="turbulent">IEC Turbulent Spectrum</option>
-                        <option value="high_wind_cutout">High Wind Cutout (&gt;25 m/s)</option>
-                    </select>
-                    <button class="btn btn-primary" id="btnRunSim">Run Scenario</button>
-                    <button class="btn btn-outline" id="btnResetSim">Reset Plant</button>
-                </div>
-            </section>
-
-            <!-- Middle Column: Fault Injection Control -->
-            <section class="card fault-card">
-                <div class="card-header">
-                    <h2>Fault Injection Engine</h2>
-                    <span class="badge-count" id="faultCountBadge">11 Types</span>
-                </div>
-                <p class="section-desc">Inject perturbations to test protective trips, safety limits, and fault containment latency.</p>
-
-                <div class="fault-controls">
-                    <div class="form-group">
-                        <label>Select Injected Failure Mode</label>
-                        <select id="faultTypeSelect" class="form-select">
-                            <option value="RotorOverspeed">Critical Rotor Overspeed (Trip &gt;1725 RPM)</option>
-                            <option value="GeneratorOverheat">Generator Stator Thermal Overheat (&gt;98&deg;C)</option>
-                            <option value="CommunicationFailure">Loss of Sensor Bus Communication</option>
-                            <option value="VibrationSpike">Structural Vibration Exceedance (&gt;5.5 mm/s)</option>
-                            <option value="InvalidSensorValue">Invalid / Corrupt Sensor Value (NaN)</option>
-                            <option value="SensorRotorSpeedFailure">Rotor Speed Encoder Dropout</option>
-                            <option value="ExcessiveWind">Extreme Storm Gust Cut-Out</option>
-                            <option value="StaleSensorData">Frozen / Stale Sensor Buffer</option>
-                            <option value="PitchActuatorStuck">Pitch Actuator Seizure</option>
-                        </select>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Severity</label>
-                            <select id="faultSeveritySelect" class="form-select">
-                                <option value="CRITICAL">CRITICAL</option>
-                                <option value="HIGH" selected>HIGH</option>
-                                <option value="MEDIUM">MEDIUM</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Duration (s)</label>
-                            <input type="number" id="faultDurationInput" class="form-input" value="4.0" step="0.5" min="0.5" max="30.0">
+    <!-- Main Container -->
+    <main class="scada-viewport">
+        <!-- ================= TAB 1: OVERVIEW & SCADA ================= -->
+        <div class="tab-pane active" id="tab-overview">
+            <div class="overview-grid">
+                <!-- Left: Turbine 2D Cutaway & Live Rotor Simulation -->
+                <div class="scada-card plant-schematic-card">
+                    <div class="card-top-bar">
+                        <h3>TURBINE AERODYNAMICS &amp; DRIVETRAIN SCHEMATIC</h3>
+                        <div class="schematic-badges">
+                            <span class="badge-blue" id="tsrBadge">TSR: 8.1</span>
+                            <span class="badge-blue" id="cpBadge">Cp: 0.46</span>
+                            <span class="badge-green" id="gearRatioBadge">GEAR: 1:95</span>
                         </div>
                     </div>
 
-                    <button class="btn btn-danger btn-block" id="btnInjectFault">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                        </svg>
-                        Inject Fault Scenario
-                    </button>
-                </div>
+                    <div class="turbine-visualizer-container">
+                        <!-- Interactive SVG Turbine Nacelle & Spinning Rotor -->
+                        <div class="turbine-stage">
+                            <!-- Wind Particle Stream Animation -->
+                            <div class="wind-stream-canvas" id="windStream"></div>
 
-                <!-- Fault Verification History -->
-                <div class="fault-results-box" id="faultResultsBox">
-                    <div class="fault-result-header">
-                        <span>Fault Reaction Audit</span>
-                        <span id="faultReactionBadge" class="badge-mini">IDLE</span>
-                    </div>
-                    <div class="fault-log-content" id="faultLogContent">
-                        Ready. Click "Inject Fault Scenario" to observe real-time controller trip and containment.
-                    </div>
-                </div>
-            </section>
+                            <!-- Turbine Graphic -->
+                            <svg class="turbine-svg" viewBox="0 0 500 420" id="turbineSvg">
+                                <!-- Tower Base -->
+                                <linearGradient id="towerGrad" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%" stop-color="#18233c"/>
+                                    <stop offset="50%" stop-color="#2d3f66"/>
+                                    <stop offset="100%" stop-color="#141c30"/>
+                                </linearGradient>
+                                <path d="M 230 420 L 244 190 L 256 190 L 270 420 Z" fill="url(#towerGrad)" stroke="#38bdf8" stroke-width="0.8" opacity="0.9"/>
+                                
+                                <!-- Internal Nacelle Cutaway Box -->
+                                <rect x="200" y="145" width="120" height="52" rx="6" fill="#121b2d" stroke="#38bdf8" stroke-width="1.8"/>
+                                
+                                <!-- Drivetrain Components inside Nacelle -->
+                                <!-- Main Low-Speed Shaft (Rotor) -->
+                                <rect x="210" y="166" width="22" height="10" fill="#64748b"/>
+                                <!-- Gearbox Block -->
+                                <rect x="232" y="155" width="28" height="32" rx="3" fill="#1e293b" stroke="#00f0ff" stroke-width="1.2"/>
+                                <text x="246" y="174" fill="#00f0ff" font-size="7" font-family="JetBrains Mono" text-anchor="middle">GEAR</text>
+                                <!-- High Speed Shaft & Disc Brake -->
+                                <rect x="260" y="168" width="12" height="6" fill="#94a3b8"/>
+                                <rect id="brakeDisc" x="268" y="158" width="5" height="26" fill="#10b981" stroke="#059669" stroke-width="1"/>
+                                <!-- Generator Block (Color shifts with heat) -->
+                                <rect id="generatorBlock" x="278" y="153" width="34" height="36" rx="4" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
+                                <text x="295" y="174" fill="#ffffff" font-size="7.5" font-family="JetBrains Mono" font-weight="700" text-anchor="middle">GEN</text>
 
-            <!-- Right Column: Automated Validation Suite -->
-            <section class="card validation-card">
-                <div class="card-header">
-                    <h2>Automated Verification Engine</h2>
-                    <button class="btn btn-success btn-sm" id="btnRunValidation">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        Validate All (12 REQs)
-                    </button>
-                </div>
+                                <!-- Nacelle Anemometer Top -->
+                                <circle cx="305" cy="138" r="4" fill="#ffb800"/>
+                                <line x1="305" y1="145" x2="305" y2="138" stroke="#ffb800" stroke-width="1.5"/>
 
-                <!-- KPI Metric Stats -->
-                <div class="val-kpi-row">
-                    <div class="val-kpi">
-                        <span class="val-kpi-num green" id="kpiPass">12</span>
-                        <span class="val-kpi-label">PASSED</span>
-                    </div>
-                    <div class="val-kpi">
-                        <span class="val-kpi-num red" id="kpiFail">0</span>
-                        <span class="val-kpi-label">FAILED</span>
-                    </div>
-                    <div class="val-kpi">
-                        <span class="val-kpi-num blue" id="kpiRate">100%</span>
-                        <span class="val-kpi-label">PASS RATE</span>
-                    </div>
-                </div>
+                                <!-- Rotor Hub & 3 Blades Group (Rotated via JS) -->
+                                <g id="rotorGroup" transform="translate(200, 171)">
+                                    <!-- Hub Center -->
+                                    <circle cx="0" cy="0" r="14" fill="#38bdf8" stroke="#ffffff" stroke-width="1.5"/>
+                                    <!-- Blade 1 -->
+                                    <g transform="rotate(0)">
+                                        <path d="M -4 -12 L -7 -135 Q 0 -148 6 -135 L 4 -12 Z" fill="#f8fafc" stroke="#94a3b8" stroke-width="1"/>
+                                        <line x1="0" y1="-12" x2="0" y2="-130" stroke="#0284c7" stroke-width="1.5" opacity="0.6"/>
+                                        <!-- Pitch Angle Indicator -->
+                                        <text x="12" y="-70" fill="#ffb800" font-size="8" font-family="JetBrains Mono" id="bladePitchText">β: 2.4°</text>
+                                    </g>
+                                    <!-- Blade 2 -->
+                                    <g transform="rotate(120)">
+                                        <path d="M -4 -12 L -7 -135 Q 0 -148 6 -135 L 4 -12 Z" fill="#f8fafc" stroke="#94a3b8" stroke-width="1"/>
+                                    </g>
+                                    <!-- Blade 3 -->
+                                    <g transform="rotate(240)">
+                                        <path d="M -4 -12 L -7 -135 Q 0 -148 6 -135 L 4 -12 Z" fill="#f8fafc" stroke="#94a3b8" stroke-width="1"/>
+                                    </g>
+                                    <!-- Hub Cap -->
+                                    <circle cx="0" cy="0" r="6" fill="#0f172a"/>
+                                </g>
+                            </svg>
+                        </div>
 
-                <!-- Requirements List -->
-                <div class="req-list" id="reqList">
-                    <div class="req-item pass">
-                        <span class="req-badge">REQ-001</span>
-                        <span class="req-title">Rotor Speed Tracking (Region 2)</span>
-                        <span class="status-tag pass">PASS</span>
+                        <!-- Quick Live Telemetry Legend under 2D cutaway -->
+                        <div class="schematic-telemetry-row">
+                            <div class="sch-item">
+                                <span class="sch-lbl">ROTOR SPEED</span>
+                                <span class="sch-val" id="schRotorRpm">15.79 <small>RPM</small></span>
+                            </div>
+                            <div class="sch-item">
+                                <span class="sch-lbl">AERO TORQUE</span>
+                                <span class="sch-val" id="schAeroTorque">151.2 <small>kNm</small></span>
+                            </div>
+                            <div class="sch-item">
+                                <span class="sch-lbl">GEN COUNTER-TORQUE</span>
+                                <span class="sch-val" id="schGenTorque">15.8 <small>kNm</small></span>
+                            </div>
+                            <div class="sch-item">
+                                <span class="sch-lbl">E-BRAKE STATUS</span>
+                                <span class="sch-val green-text" id="schBrakeState">DISENGAGED</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="req-item pass">
-                        <span class="req-badge">REQ-002</span>
-                        <span class="req-title">Rated Power Pitch Regulation (Region 3)</span>
-                        <span class="status-tag pass">PASS</span>
-                    </div>
-                    <div class="req-item pass">
-                        <span class="req-badge">REQ-003</span>
-                        <span class="req-title">Rotor Overspeed Hard Trip (&le;250ms)</span>
-                        <span class="status-tag pass">PASS</span>
-                    </div>
-                    <div class="req-item pass">
-                        <span class="req-badge">REQ-004</span>
-                        <span class="req-title">Storm Cut-Out Feathering (&gt;25 m/s)</span>
-                        <span class="status-tag pass">PASS</span>
-                    </div>
-                    <div class="req-item pass">
-                        <span class="req-badge">REQ-005</span>
-                        <span class="req-title">Generator Overheat Trip (&ge;98&deg;C)</span>
-                        <span class="status-tag pass">PASS</span>
-                    </div>
-                    <div class="req-item pass">
-                        <span class="req-badge">REQ-006</span>
-                        <span class="req-title">Thermal Warning Power Derating (65%)</span>
-                        <span class="status-tag pass">PASS</span>
-                    </div>
-                    <div class="req-item pass">
-                        <span class="req-badge">REQ-007</span>
-                        <span class="req-title">Vibration Trip (&ge;5.5 mm/s)</span>
-                        <span class="status-tag pass">PASS</span>
-                    </div>
-                    <div class="req-item pass">
-                        <span class="req-badge">REQ-008</span>
-                        <span class="req-title">Sensor NaN Failsafe Protection</span>
-                        <span class="status-tag pass">PASS</span>
-                    </div>
-                    <div class="req-item pass">
-                        <span class="req-badge">REQ-009</span>
-                        <span class="req-title">Communication Bus Loss Failsafe</span>
-                        <span class="status-tag pass">PASS</span>
-                    </div>
-                    <div class="req-item pass">
-                        <span class="req-badge">REQ-010</span>
-                        <span class="req-title">Pitch Slew Rate Limit Compliance</span>
-                        <span class="status-tag pass">PASS</span>
-                    </div>
-                    <div class="req-item pass">
-                        <span class="req-badge">REQ-011</span>
-                        <span class="req-title">Auto Fault Recovery Hysteresis</span>
-                        <span class="status-tag pass">PASS</span>
-                    </div>
-                    <div class="req-item pass">
-                        <span class="req-badge">REQ-012</span>
-                        <span class="req-title">Extreme Operating Gust (EOG) Stability</span>
-                        <span class="status-tag pass">PASS</span>
+
+                    <!-- Interactive Environment Control Deck -->
+                    <div class="env-control-deck">
+                        <div class="deck-title">
+                            <span>🎮 INFLOW WIND &amp; SCENARIO SIMULATOR CONTROLS</span>
+                            <span class="sub-deck">Inject Live Wind Dynamics (IEC 61400-1)</span>
+                        </div>
+                        <div class="deck-inputs">
+                            <div class="deck-field">
+                                <label>Target Wind Velocity: <strong id="lblWindSpeed">11.5 m/s</strong></label>
+                                <input type="range" id="windSlider" min="0" max="30" step="0.5" value="11.5" class="scada-range">
+                            </div>
+                            <div class="preset-wind-buttons">
+                                <button class="btn-preset" data-wind="2.5">Cut-In (2.5 m/s)</button>
+                                <button class="btn-preset" data-wind="8.0">Region 2 MPPT (8.0 m/s)</button>
+                                <button class="btn-preset active" data-wind="11.5">Rated Wind (11.5 m/s)</button>
+                                <button class="btn-preset" data-wind="16.0">Region 3 Pitch (16.0 m/s)</button>
+                                <button class="btn-preset danger" data-wind="26.0">Storm Cut-Out (26.0 m/s)</button>
+                            </div>
+                        </div>
+                        <div class="deck-actions-row">
+                            <button class="btn-action primary" id="btnTriggerGust">🌪️ Trigger IEC Extreme Gust (+7 m/s)</button>
+                            <button class="btn-action outline" id="btnToggleTurbulence">〰️ Toggle Turbulent Spectrum</button>
+                            <button class="btn-action success" id="btnResetPlant">🔄 Reset Turbine Baseline</button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Report Action Links -->
-                <div class="report-links">
-                    <a href="/reports/latest" target="_blank" class="report-btn">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                        </svg>
-                        View HTML Validation Report
-                    </a>
-                </div>
-            </section>
-        </main>
+                <!-- Right: High-Density Digital SCADA Telemetry Gauges -->
+                <div class="scada-card telemetry-cluster-card">
+                    <div class="card-top-bar">
+                        <h3>HIGH-PRECISION SCADA DIGITAL GAUGES</h3>
+                        <span class="refresh-pill">LIVE 20 Hz</span>
+                    </div>
 
-        <!-- Footer -->
-        <footer class="footer">
-            <p><strong>TurbineGuard Test Platform</strong> &bull; Siemens Gamesa Renewable Power Pvt Ltd Technology Portfolio</p>
-            <p>Candidate: Kumari Simran &bull; B.Tech Computer Engineering &bull; CMR University Bangalore</p>
-        </footer>
-    </div>
+                    <div class="gauges-enterprise-grid">
+                        <!-- Gauge 1: Hub Wind -->
+                        <div class="scada-gauge-box">
+                            <div class="gauge-header">
+                                <span class="g-title">HUB-HEIGHT WIND SPEED</span>
+                                <span class="g-icon">💨</span>
+                            </div>
+                            <div class="gauge-num-block">
+                                <span class="g-value cyan-glow" id="valGWind">11.5</span>
+                                <span class="g-unit">m/s</span>
+                            </div>
+                            <div class="gauge-meter-track">
+                                <div class="gauge-meter-fill cyan-bg" id="meterWind" style="width: 38%;"></div>
+                                <div class="gauge-limit-marker rated" style="left: 38.3%;" title="Rated (11.5 m/s)"></div>
+                                <div class="gauge-limit-marker trip" style="left: 83.3%;" title="Cutout Trip (25 m/s)"></div>
+                            </div>
+                            <div class="gauge-sub-meta">
+                                <span>Cut-in: 3.0 m/s</span>
+                                <span>Cut-out: 25.0 m/s</span>
+                            </div>
+                        </div>
+
+                        <!-- Gauge 2: Generator Speed -->
+                        <div class="scada-gauge-box highlight-box">
+                            <div class="gauge-header">
+                                <span class="g-title">GENERATOR SPEED (HIGH-SPEED SHAFT)</span>
+                                <span class="g-icon">⚙️</span>
+                            </div>
+                            <div class="gauge-num-block">
+                                <span class="g-value green-glow" id="valGGenSpeed">1498.5</span>
+                                <span class="g-unit">RPM</span>
+                            </div>
+                            <div class="gauge-meter-track">
+                                <div class="gauge-meter-fill green-bg" id="meterGenSpeed" style="width: 75%;"></div>
+                                <div class="gauge-limit-marker rated" style="left: 75%;" title="Rated (1500 RPM)"></div>
+                                <div class="gauge-limit-marker trip" style="left: 86.25%;" title="Hard Trip (1725 RPM)"></div>
+                            </div>
+                            <div class="gauge-sub-meta">
+                                <span>Rated: 1500 RPM</span>
+                                <span class="red-text">Trip: 1725 RPM</span>
+                            </div>
+                        </div>
+
+                        <!-- Gauge 3: Blade Pitch Angle -->
+                        <div class="scada-gauge-box">
+                            <div class="gauge-header">
+                                <span class="g-title">COLLECTIVE BLADE PITCH ANGLE</span>
+                                <span class="g-icon">📐</span>
+                            </div>
+                            <div class="gauge-num-block">
+                                <span class="g-value amber-glow" id="valGPitch">2.4</span>
+                                <span class="g-unit">deg (&beta;)</span>
+                            </div>
+                            <div class="gauge-meter-track">
+                                <div class="gauge-meter-fill amber-bg" id="meterPitch" style="width: 3%;"></div>
+                            </div>
+                            <div class="gauge-sub-meta">
+                                <span>Fine: 0.0&deg;</span>
+                                <span>Feathered: 90.0&deg;</span>
+                            </div>
+                        </div>
+
+                        <!-- Gauge 4: Electrical Power -->
+                        <div class="scada-gauge-box">
+                            <div class="gauge-header">
+                                <span class="g-title">ACTIVE ELECTRICAL POWER OUTPUT</span>
+                                <span class="g-icon">⚡</span>
+                            </div>
+                            <div class="gauge-num-block">
+                                <span class="g-value cyan-glow" id="valGPower">2488</span>
+                                <span class="g-unit">kW (2.49 MW)</span>
+                            </div>
+                            <div class="gauge-meter-track">
+                                <div class="gauge-meter-fill blue-bg" id="meterPower" style="width: 99%;"></div>
+                                <div class="gauge-limit-marker rated" style="left: 90%;" title="Rated (2500 kW)"></div>
+                            </div>
+                            <div class="gauge-sub-meta">
+                                <span>Capacity: 2500 kW</span>
+                                <span>Derated: 1625 kW</span>
+                            </div>
+                        </div>
+
+                        <!-- Gauge 5: Generator Stator Temperature -->
+                        <div class="scada-gauge-box">
+                            <div class="gauge-header">
+                                <span class="g-title">STATOR CORE TEMPERATURE</span>
+                                <span class="g-icon">🌡️</span>
+                            </div>
+                            <div class="gauge-num-block">
+                                <span class="g-value" id="valGTemp">68.4</span>
+                                <span class="g-unit">&deg;C</span>
+                            </div>
+                            <div class="gauge-meter-track">
+                                <div class="gauge-meter-fill" id="meterTemp" style="width: 57%;"></div>
+                                <div class="gauge-limit-marker warning" style="left: 70.8%;" title="Derate Warning (85°C)"></div>
+                                <div class="gauge-limit-marker trip" style="left: 81.6%;" title="Trip (98°C)"></div>
+                            </div>
+                            <div class="gauge-sub-meta">
+                                <span class="amber-text">Warn: 85.0&deg;C</span>
+                                <span class="red-text">Trip: 98.0&deg;C</span>
+                            </div>
+                        </div>
+
+                        <!-- Gauge 6: Nacelle Dynamic Vibration -->
+                        <div class="scada-gauge-box">
+                            <div class="gauge-header">
+                                <span class="g-title">NACELLE STRUCTURAL VIBRATION</span>
+                                <span class="g-icon">📳</span>
+                            </div>
+                            <div class="gauge-num-block">
+                                <span class="g-value green-glow" id="valGVib">1.18</span>
+                                <span class="g-unit">mm/s (RMS)</span>
+                            </div>
+                            <div class="gauge-meter-track">
+                                <div class="gauge-meter-fill green-bg" id="meterVib" style="width: 19%;"></div>
+                                <div class="gauge-limit-marker warning" style="left: 58.3%;" title="Warning (3.5 mm/s)"></div>
+                                <div class="gauge-limit-marker trip" style="left: 91.6%;" title="Trip (5.5 mm/s)"></div>
+                            </div>
+                            <div class="gauge-sub-meta">
+                                <span class="amber-text">Warn: 3.5 mm/s</span>
+                                <span class="red-text">Trip: 5.5 mm/s</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mini Live Canvas Strip Chart -->
+                    <div class="live-strip-container">
+                        <div class="strip-header">
+                            <span>REAL-TIME MULTI-VARIABLE OSCILLOSCOPE (60s BUFFER)</span>
+                            <div class="strip-legend">
+                                <span class="l-item"><span class="l-dot green"></span> Gen RPM</span>
+                                <span class="l-item"><span class="l-dot yellow"></span> Pitch (&beta;)</span>
+                                <span class="l-item"><span class="l-dot cyan"></span> Power kW</span>
+                                <span class="l-item"><span class="l-dot red"></span> 1725 Trip</span>
+                            </div>
+                        </div>
+                        <canvas id="liveStripCanvas" height="110"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 2: FAULT INJECTION WORKBENCH ================= -->
+        <div class="tab-pane" id="tab-faults">
+            <div class="faults-workbench-grid">
+                <!-- Left: Fault Selection Matrix & Trigger Controls -->
+                <div class="scada-card fault-matrix-card">
+                    <div class="card-top-bar">
+                        <h3>HARDWARE-IN-THE-LOOP (HIL) FAULT INJECTION MATRIX</h3>
+                        <span class="badge-blue">11 CERTIFIED FAILURE MODES</span>
+                    </div>
+                    <p class="card-desc">Simulate sensor dropouts, catastrophic aerodynamic overspeeds, thermal runaway, and communication losses to verify real-time controller safety containment latency.</p>
+
+                    <!-- Interactive Grid of 11 Fault Mode Cards -->
+                    <div class="fault-cards-grid" id="faultCardsGrid">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Injected Fault Configuration Tray -->
+                    <div class="fault-config-tray">
+                        <div class="tray-field">
+                            <label>Selected Fault Mode:</label>
+                            <div class="selected-fault-display" id="selectedFaultName">RotorOverspeed (Aerodynamic Runaway)</div>
+                        </div>
+                        <div class="tray-row">
+                            <div class="tray-field">
+                                <label>Severity Rating:</label>
+                                <select id="selSeverity" class="scada-select">
+                                    <option value="CRITICAL" selected>CRITICAL (Immediate E-Stop)</option>
+                                    <option value="HIGH">HIGH (Fault Trip)</option>
+                                    <option value="MEDIUM">MEDIUM (Derate / Warning)</option>
+                                </select>
+                            </div>
+                            <div class="tray-field">
+                                <label>Fault Injection Duration:</label>
+                                <div class="dur-input-wrap">
+                                    <input type="number" id="inpDuration" value="4.0" step="0.5" min="0.5" max="30.0" class="scada-input">
+                                    <span>seconds</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tray-actions">
+                            <button class="btn-inject-fault" id="btnExecuteFault">
+                                <span class="pulse-zap">⚡</span> INJECT FAULT SCENARIO NOW
+                            </button>
+                            <button class="btn-clear-fault" id="btnClearFaults">
+                                🔄 Clear Active Fault Overrides
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Real-time Containment Audit & Latency Oscilloscope -->
+                <div class="scada-card fault-audit-card">
+                    <div class="card-top-bar">
+                        <h3>SAFETY SUPERVISORY RESPONSE &amp; CONTAINMENT AUDIT</h3>
+                        <span class="badge-tag" id="auditStatusTag">IDLE / READY</span>
+                    </div>
+
+                    <div class="audit-kpi-bar">
+                        <div class="audit-kpi-item">
+                            <span class="a-kpi-lbl">RESPONSE LATENCY</span>
+                            <span class="a-kpi-val green-text" id="auditLatency">50.0 <small>ms</small></span>
+                        </div>
+                        <div class="audit-kpi-item">
+                            <span class="a-kpi-lbl">ACCEPTANCE LIMIT</span>
+                            <span class="a-kpi-val">&le; 250.0 <small>ms</small></span>
+                        </div>
+                        <div class="audit-kpi-item">
+                            <span class="a-kpi-lbl">CONTAINMENT VERIFICATION</span>
+                            <span class="a-kpi-val green-text" id="auditOutcome">PASSED</span>
+                        </div>
+                    </div>
+
+                    <!-- Step-by-step Execution Log Console -->
+                    <div class="audit-console">
+                        <div class="console-top">
+                            <span>SUPERVISORY PROTECTION EVENT LOG</span>
+                            <button class="btn-copy-log" id="btnCopyLog">Copy Log</button>
+                        </div>
+                        <div class="console-body" id="faultConsoleLog">
+                            <div class="log-line info">[SYSTEM] Safety Supervisor active at 20Hz. All protection trips armed.</div>
+                            <div class="log-line info">[SYSTEM] Ready for fault injection testing. Select a fault card on the left.</div>
+                        </div>
+                    </div>
+
+                    <!-- Fault Waveform Comparison Chart -->
+                    <div class="fault-chart-wrap">
+                        <canvas id="faultResponseChart" height="150"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 3: FORMAL VALIDATION SUITE ================= -->
+        <div class="tab-pane" id="tab-validation">
+            <div class="validation-view-grid">
+                <!-- Left: Requirements Table -->
+                <div class="scada-card val-table-card">
+                    <div class="card-top-bar">
+                        <div>
+                            <h3>FORMAL ENGINEERING REQUIREMENTS TRACEABILITY MATRIX</h3>
+                            <span class="card-sub">Deterministic verification against engineering acceptance criteria &amp; tolerances</span>
+                        </div>
+                        <button class="btn-run-all-val" id="btnRunAllVal">
+                            <span>▶</span> RUN ALL 12 VALIDATION TESTS
+                        </button>
+                    </div>
+
+                    <!-- Filter buttons -->
+                    <div class="val-filter-bar">
+                        <button class="filter-chip active" data-filter="all">All Requirements (12)</button>
+                        <button class="filter-chip" data-filter="safety">Safety &amp; Trips (4)</button>
+                        <button class="filter-chip" data-filter="aero">Aero &amp; Power (4)</button>
+                        <button class="filter-chip" data-filter="sensors">Sensors &amp; Comms (4)</button>
+                    </div>
+
+                    <div class="val-table-container">
+                        <table class="enterprise-table" id="valTable">
+                            <thead>
+                                <tr>
+                                    <th>REQ ID</th>
+                                    <th>REQUIREMENT TITLE &amp; ACCEPTANCE CRITERIA</th>
+                                    <th>MEASURED VALUE</th>
+                                    <th>TARGET ENVELOPE</th>
+                                    <th>EXEC TIME</th>
+                                    <th>VERIFICATION STATUS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="valTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Right: Validation Metrics & Scorecard -->
+                <div class="scada-card val-summary-card">
+                    <div class="card-top-bar">
+                        <h3>VALIDATION AUDIT SCORECARD</h3>
+                    </div>
+
+                    <div class="scorecard-radial-wrap">
+                        <div class="scorecard-big-num green-glow" id="scPassRate">100%</div>
+                        <div class="scorecard-sub">FORMAL VERIFICATION PASS RATE</div>
+                    </div>
+
+                    <div class="scorecard-breakdown">
+                        <div class="sc-row">
+                            <span>Total Formal Requirements:</span>
+                            <strong id="scTotalReqs">12</strong>
+                        </div>
+                        <div class="sc-row">
+                            <span>Requirements Passed:</span>
+                            <strong class="green-text" id="scPassedReqs">12</strong>
+                        </div>
+                        <div class="sc-row">
+                            <span>Requirements Failed:</span>
+                            <strong class="red-text" id="scFailedReqs">0</strong>
+                        </div>
+                        <div class="sc-row">
+                            <span>Pytest Automated Test Suite:</span>
+                            <strong class="cyan-text">65 / 65 Passed</strong>
+                        </div>
+                        <div class="sc-row">
+                            <span>Total Suite Exec Time:</span>
+                            <strong id="scTotalTime">72.4 ms</strong>
+                        </div>
+                    </div>
+
+                    <div class="scorecard-actions">
+                        <a href="/reports/latest" target="_blank" class="btn-report-view">
+                            📑 Open Full Executive HTML Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 4: OSCILLOSCOPE ================= -->
+        <div class="tab-pane" id="tab-oscilloscope">
+            <div class="scada-card oscilloscope-card">
+                <div class="card-top-bar">
+                    <h3>HIGH-FREQUENCY MULTI-CHANNEL TELEMETRY OSCILLOSCOPE</h3>
+                    <div class="osc-controls">
+                        <label class="ch-toggle green"><input type="checkbox" id="chkRpm" checked> Generator RPM</label>
+                        <label class="ch-toggle yellow"><input type="checkbox" id="chkPitch" checked> Pitch Angle (&beta;)</label>
+                        <label class="ch-toggle cyan"><input type="checkbox" id="chkPower" checked> Electrical Power</label>
+                        <label class="ch-toggle magenta"><input type="checkbox" id="chkTemp" checked> Generator Temp</label>
+                        <label class="ch-toggle orange"><input type="checkbox" id="chkVib" checked> Vibration</label>
+                    </div>
+                </div>
+                <div class="large-chart-container">
+                    <canvas id="bigOscilloscopeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 5: REPORTS & DATA EXPORT ================= -->
+        <div class="tab-pane" id="tab-reports">
+            <div class="reports-view-grid">
+                <div class="scada-card report-download-card">
+                    <div class="card-top-bar">
+                        <h3>ENGINEERING VALIDATION ARTIFACTS</h3>
+                    </div>
+                    <p class="card-desc">Download or preview certified automated testing documentation generated directly from physical simulation runs.</p>
+
+                    <div class="artifacts-grid">
+                        <div class="artifact-item">
+                            <div class="art-icon">🌐</div>
+                            <div class="art-info">
+                                <h4>Interactive HTML Validation Report</h4>
+                                <p>Complete styled report with embedded base64 plots, KPI scorecards, and requirement diagnostics.</p>
+                            </div>
+                            <a href="/reports/latest" target="_blank" class="btn-art">View HTML Report</a>
+                        </div>
+
+                        <div class="artifact-item">
+                            <div class="art-icon">📑</div>
+                            <div class="art-info">
+                                <h4>Executive PDF Validation Report</h4>
+                                <p>Formal documentation compiled via ReportLab for engineering audit sign-off.</p>
+                            </div>
+                            <a href="/reports/validation_report.pdf" target="_blank" class="btn-art">Download PDF</a>
+                        </div>
+
+                        <div class="artifact-item">
+                            <div class="art-icon">📊</div>
+                            <div class="art-info">
+                                <h4>Tabular CSV Validation Results</h4>
+                                <p>Machine-readable test execution records for Excel / Pandas post-processing.</p>
+                            </div>
+                            <a href="/reports/validation_results.csv" download class="btn-art">Export CSV</a>
+                        </div>
+
+                        <div class="artifact-item">
+                            <div class="art-icon">📦</div>
+                            <div class="art-info">
+                                <h4>Machine-Readable JSON Telemetry</h4>
+                                <p>Comprehensive telemetry dataset and requirement trace for CI/CD pipelines.</p>
+                            </div>
+                            <a href="/reports/validation_report.json" download class="btn-art">Export JSON</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="scada-footer">
+        <div>
+            <strong>TURBINEGUARD™ PLATFORM</strong> &bull; Developed by <strong>Kumari Simran</strong> (CMR University, Bangalore) &bull; Siemens Gamesa Renewable Power Technology Portfolio
+        </div>
+        <div class="footer-links">
+            <a href="https://github.com/simran846/turbineguard" target="_blank">GitHub Repository</a> &bull;
+            <a href="https://www.linkedin.com/in/kumari-simran-37b344333/" target="_blank">LinkedIn Profile</a> &bull;
+            <a href="/docs" target="_blank">FastAPI Swagger UI</a>
+        </div>
+    </footer>
 
     <script src="dashboard.js"></script>
 </body>
