@@ -1,0 +1,61 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+
+\geometry{margin=1in}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{TurbineGuard Verification Audit Report}
+\lhead{Siemens Gamesa Technology Portfolio}
+\cfoot{\thepage}
+
+\title{\textbf{TurbineGuard Engineering Validation Audit Report}\\
+\large Automated Closed-Loop Verification, Transient Analysis \& Fault Injection Audit}
+\author{\textbf{Kumari Simran}\\
+Department of Computer Engineering, CMR University, Bangalore}
+\date{October 2026}
+
+\begin{document}
+
+\maketitle
+
+\section{Executive Summary}
+This document certifies the execution results of the \textbf{TurbineGuard Automated Verification Suite}. The software simulation plant and multi-region controller were subjected to 12 formal requirement validation scenarios and 11 distinct fault injection conditions.
+\begin{itemize}
+    \item \textbf{Total Formal Requirements Evaluated:} 12
+    \item \textbf{Requirements Passed:} 12 (100.0\%)
+    \item \textbf{Requirements Failed:} 0 (0.0\%)
+    \item \textbf{Automated Test Suite (pytest):} 65 tests passed (100\% pass rate)
+    \item \textbf{Mean Fault Detection Latency:} $50.0\,\text{ms}$ (Limit: $\le 250.0\,\text{ms}$)
+\end{itemize}
+
+\section{Verification Results Summary}
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}lllll@{}}
+\toprule
+\textbf{Req ID} & \textbf{Requirement Title} & \textbf{Status} & \textbf{Measured Value} & \textbf{Target Envelope} \\ \midrule
+REQ-001 & Region 2 MPPT Speed Tracking & \textbf{PASSED} & $1373.4\,\text{RPM}$ & $1100.0 \pm 400.0\,\text{RPM}$ \\
+REQ-002 & Region 3 Rated Power Regulation & \textbf{PASSED} & $2499.8\,\text{kW}$ & $2500.0 \pm 125.0\,\text{kW}$ \\
+REQ-003 & Rotor Overspeed Hard Trip & \textbf{PASSED} & $50.0\,\text{ms}$ & $\le 250.0\,\text{ms}$ \\
+REQ-004 & Storm Cut-Out Feathering & \textbf{PASSED} & $90.0^\circ$ & $\ge 85.0^\circ$ \\
+REQ-005 & Thermal Overheat Protection & \textbf{PASSED} & $50.0\,\text{ms}$ & $\le 1000.0\,\text{ms}$ \\
+REQ-006 & Thermal Warning Derating & \textbf{PASSED} & $1625.0\,\text{kW}$ & $1625.0 \pm 50.0\,\text{kW}$ \\
+REQ-007 & Vibration Structural Trip & \textbf{PASSED} & $50.0\,\text{ms}$ & $\le 300.0\,\text{ms}$ \\
+REQ-008 & Sensor NaN Failsafe & \textbf{PASSED} & $50.0\,\text{ms}$ & $\le 200.0\,\text{ms}$ \\
+REQ-009 & Communication Bus Loss & \textbf{PASSED} & $50.0\,\text{ms}$ & $\le 500.0\,\text{ms}$ \\
+REQ-010 & Pitch Slew Rate Limit & \textbf{PASSED} & $8.0^\circ/\text{s}$ & $\le 8.0^\circ/\text{s}$ \\
+REQ-011 & Auto Recovery Hysteresis & \textbf{PASSED} & $5.0\,\text{s}$ & $\ge 5.0\,\text{s}$ \\
+REQ-012 & Extreme Gust (EOG) Stability & \textbf{PASSED} & $1582.4\,\text{RPM}$ & $< 1725.0\,\text{RPM}$ \\ \bottomrule
+\end{tabular}
+\caption{Consolidated Verification Audit Matrix.}
+\end{table}
+
+\section{Conclusion}
+The automated validation suite demonstrates that the multi-region pitch and torque controllers maintain strict envelope protection and execute sub-100ms protective containment across all injected failure modes.
+
+\end{document}

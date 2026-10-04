@@ -1,0 +1,60 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+
+\geometry{margin=1in}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{TurbineGuard Test Plan \& Strategy}
+\lhead{Siemens Gamesa Technology Portfolio}
+\cfoot{\thepage}
+
+\title{\textbf{TurbineGuard: Automated Test Plan \& Verification Strategy}\\
+\large Comprehensive Software Quality Assurance and Fault Tolerance Protocol}
+\author{\textbf{Kumari Simran}\\
+Department of Computer Engineering, CMR University, Bangalore}
+\date{October 2026}
+
+\begin{document}
+
+\maketitle
+
+\section{Testing Strategy Overview}
+The TurbineGuard verification strategy encompasses a multi-tier automated testing hierarchy:
+\begin{enumerate}
+    \item \textbf{Unit Testing (pytest):} Isolated mathematical verification of aerodynamic $C_p$ curves, sensor noise models, PID controllers, and safety threshold logic.
+    \item \textbf{Integration Testing:} Closed-loop dynamic interactions between the physical plant, sensor suite, multi-region controller, and SQLite database persistence.
+    \item \textbf{Safety \& Fault-Injection Testing:} Systematic simulation of hardware and environmental anomalies (overspeed, thermal runaway, communication loss, corrupt sensor packets) to verify containment latency.
+    \item \textbf{Formal Requirements Validation:} Deterministic evaluation of engineering requirements REQ-001 through REQ-012 with quantitative tolerance assertions.
+\end{enumerate}
+
+\section{Requirements Verification Matrix}
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Req ID} & \textbf{Requirement Title} & \textbf{Acceptance Criteria} & \textbf{Tolerance} \\ \midrule
+REQ-001 & Region 2 MPPT Speed Tracking & Steady state Gen RPM $\in [700, 1500]$ & $\pm 400\,\text{RPM}$ \\
+REQ-002 & Region 3 Rated Power Regulation & Mean Electrical Power $\le 2625\,\text{kW}$ & $+5\%$ \\
+REQ-003 & Rotor Overspeed Hard Trip & E-Stop Latched within $\le 250\,\text{ms}$ & $\pm 50\,\text{ms}$ \\
+REQ-004 & Storm Cut-Out Feathering & SHUTDOWN state \& $\beta \ge 85^\circ$ & $\pm 5^\circ$ \\
+REQ-005 & Thermal Overheat Shutdown & SHUTDOWN trip within $\le 1.0\,\text{s}$ & $\pm 0.2\,\text{s}$ \\
+REQ-006 & Thermal Warning Derating & Power capped at $1625\,\text{kW}$ ($65\%$) & $\pm 50\,\text{kW}$ \\
+REQ-007 & Vibration Trip & FAULT state within $\le 300\,\text{ms}$ & $\pm 100\,\text{ms}$ \\
+REQ-008 & Sensor NaN Failsafe & Safe FAULT mode without crash & $0.0$ \\
+REQ-009 & Communication Bus Loss & FAULT state within $\le 500\,\text{ms}$ & $\pm 50\,\text{ms}$ \\
+REQ-010 & Pitch Slew Rate Limiting & Absolute normal pitch rate $\le 8.0^\circ/\text{s}$ & $\pm 0.1^\circ/\text{s}$ \\
+REQ-011 & Auto Recovery Hysteresis & Safe state hold time $\ge 5.0\,\text{s}$ & $\pm 0.5\,\text{s}$ \\
+REQ-012 & Extreme Gust (EOG) Stability & Peak Gen RPM $< 1725\,\text{RPM}$ & $0.0\,\text{RPM}$ \\ \bottomrule
+\end{tabular}
+\caption{Requirements Verification Matrix.}
+\end{table}
+
+\section{Execution and CI/CD Automation}
+All 65 automated tests are integrated into GitHub Actions and Jenkins pipelines. Test executions produce JUnit XML artifacts, coverage reports, and machine-readable JSON telemetry.
+
+\end{document}

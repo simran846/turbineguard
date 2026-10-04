@@ -1,0 +1,172 @@
+{
+  "metadata": {
+    "project": "TurbineGuard",
+    "version": "1.0.0",
+    "organization": "Loads and Controls Engineering - Simulation & Test Automation",
+    "generated_at": "2026-10-04T15:20:52.803407+00:00"
+  },
+  "validation_suite": {
+    "name": "TurbineGuard Core Engineering Verification Suite",
+    "total_requirements": 12,
+    "passed": 12,
+    "failed": 0,
+    "warnings": 0,
+    "pass_rate_pct": 100.0,
+    "total_time_ms": 68.61,
+    "failed_ids": [],
+    "items": [
+      {
+        "req_id": "REQ-001",
+        "title": "Rotor Speed Regulation in Region 2",
+        "status": "PASSED",
+        "measured_value": 1373.4046632301988,
+        "expected_value": 1100.0,
+        "tolerance": 400.0,
+        "unit": "RPM",
+        "message": "Measured 1373.405 within target 1100.000 +/- 400.000 (Diff: 273.405)",
+        "time_ms": 6.046599999535829
+      },
+      {
+        "req_id": "REQ-002",
+        "title": "Rated Power Regulation in Region 3",
+        "status": "PASSED",
+        "measured_value": 2499.8031883003955,
+        "expected_value": 2500.0,
+        "tolerance": 125.0,
+        "unit": "kW",
+        "message": "Measured 2499.803 <= Limit 2500.000 (Tolerance: +125.000)",
+        "time_ms": 8.611700000074052
+      },
+      {
+        "req_id": "REQ-003",
+        "title": "Critical Rotor Overspeed Hard Trip",
+        "status": "PASSED",
+        "measured_value": 50.00000000000071,
+        "expected_value": 250.0,
+        "tolerance": 50.0,
+        "unit": "ms",
+        "message": "Detected in 50.0ms (Limit: 250ms). State: EMERGENCY_STOP.",
+        "time_ms": 4.309500000090338
+      },
+      {
+        "req_id": "REQ-004",
+        "title": "High Wind Cut-Out Storm Shutdown",
+        "status": "PASSED",
+        "measured_value": 89.99999999992686,
+        "expected_value": 90.0,
+        "tolerance": 5.0,
+        "unit": "deg",
+        "message": "State: SHUTDOWN, Pitch: 90.0 deg",
+        "time_ms": 12.585899999976391
+      },
+      {
+        "req_id": "REQ-005",
+        "title": "Generator Thermal Overheat Protective Trip",
+        "status": "PASSED",
+        "measured_value": 49.99999999999982,
+        "expected_value": 1000.0,
+        "tolerance": 200.0,
+        "unit": "ms",
+        "message": "Detected in 50.0ms (Limit: 1000ms). State: SHUTDOWN.",
+        "time_ms": 4.597599999215163
+      },
+      {
+        "req_id": "REQ-006",
+        "title": "Thermal High-Warning Power Derating",
+        "status": "PASSED",
+        "measured_value": 1625.0,
+        "expected_value": 1625.0,
+        "tolerance": 50.0,
+        "unit": "kW",
+        "message": "State: DERATED, Demanded Power: 1625.0 kW",
+        "time_ms": 0.023499999770137947
+      },
+      {
+        "req_id": "REQ-007",
+        "title": "Structural Vibration Trip",
+        "status": "PASSED",
+        "measured_value": 100.00000000000009,
+        "expected_value": 300.0,
+        "tolerance": 100.0,
+        "unit": "ms",
+        "message": "Detected in 100.0ms (Limit: 300ms). State: FAULT.",
+        "time_ms": 3.8453000006484217
+      },
+      {
+        "req_id": "REQ-008",
+        "title": "Sensor Data Integrity and Failsafe",
+        "status": "PASSED",
+        "measured_value": 50.00000000000027,
+        "expected_value": 200.0,
+        "tolerance": 100.0,
+        "unit": "ms",
+        "message": "Detected in 50.0ms (Limit: 200ms). State: FAULT.",
+        "time_ms": 3.62440000026254
+      },
+      {
+        "req_id": "REQ-009",
+        "title": "Communication Bus Loss Protection",
+        "status": "PASSED",
+        "measured_value": 50.00000000000027,
+        "expected_value": 500.0,
+        "tolerance": 100.0,
+        "unit": "ms",
+        "message": "Detected in 50.0ms (Limit: 500ms). State: FAULT.",
+        "time_ms": 3.170500000123866
+      },
+      {
+        "req_id": "REQ-010",
+        "title": "Pitch Actuator Normal Rate Limiting",
+        "status": "PASSED",
+        "measured_value": 8.000000000000007,
+        "expected_value": 8.0,
+        "tolerance": 0.1,
+        "unit": "deg/s",
+        "message": "Measured 8.000 <= Limit 8.000 (Tolerance: +0.100)",
+        "time_ms": 8.11870000052295
+      },
+      {
+        "req_id": "REQ-011",
+        "title": "Automatic Fault Recovery Hysteresis",
+        "status": "PASSED",
+        "measured_value": 5.0,
+        "expected_value": 5.0,
+        "tolerance": 0.5,
+        "unit": "s",
+        "message": "Auto recovery triggered at t=5.00s (Required hold: 5.0s)",
+        "time_ms": 0.4169000003457768
+      },
+      {
+        "req_id": "REQ-012",
+        "title": "Extreme Operating Gust (EOG) Dynamic Stability",
+        "status": "PASSED",
+        "measured_value": 1516.956313737276,
+        "expected_value": 1725.0,
+        "tolerance": 0.0,
+        "unit": "RPM",
+        "message": "Measured 1516.956 <= Limit 1725.000 (Tolerance: +0.000)",
+        "time_ms": 13.217100000474602
+      }
+    ]
+  },
+  "simulation_metrics": {
+    "total_duration_s": 24.95,
+    "total_energy_yield_kwh": 7.0619,
+    "mean_electrical_power_kw": 1016.96,
+    "peak_electrical_power_kw": 2875.0,
+    "mean_generator_rpm": 1006.89,
+    "max_generator_rpm": 1736.86,
+    "rpm_overshoot_pct": 15.79,
+    "mean_pitch_deg": 38.7,
+    "max_pitch_rate_deg_s": 12.0,
+    "final_generator_temp_c": 51.8,
+    "max_generator_temp_c": 66.41,
+    "peak_vibration_mm_s": 2.35,
+    "operating_states_breakdown": {
+      "EMERGENCY_STOP": 52.8,
+      "NORMAL": 44.4,
+      "DERATED": 2.8
+    }
+  },
+  "fault_results": []
+}

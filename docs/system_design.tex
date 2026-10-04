@@ -1,0 +1,111 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+
+\geometry{margin=1in}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{TurbineGuard System Design Specification}
+\lhead{Siemens Gamesa Technology Portfolio}
+\cfoot{\thepage}
+
+\title{\textbf{TurbineGuard: Wind Turbine Controller Validation \& Automated Test Platform}\\
+\large System Design \& Mathematical Physics Specification}
+\author{\textbf{Kumari Simran}\\
+Department of Computer Engineering, CMR University, Bangalore\\
+\texttt{simran846@users.noreply.github.com}}
+\date{October 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This document details the mathematical modeling, control system architecture, safety supervisory framework, and fault containment mechanisms for \textbf{TurbineGuard}. The platform is an educational software simulation and automated verification environment designed to validate variable-speed, pitch-regulated wind turbine control software against formal engineering requirements.
+\end{abstract}
+
+\section{Introduction and Objectives}
+Modern multi-megawatt wind turbines operate in complex, turbulent atmospheric environments requiring robust multi-variable control systems. The primary engineering objectives of the TurbineGuard platform are:
+\begin{enumerate}
+    \item \textbf{Region 2 Maximum Power Point Tracking (MPPT):} Optimize aerodynamic efficiency $C_p(\lambda, \beta)$ below rated wind speed.
+    \item \textbf{Region 3 Power \& Speed Regulation:} Regulate blade pitch angle $\beta$ to maintain rated electrical power $P_{rated} = 2.5\,\text{MW}$ and generator speed $\omega_g = 1500\,\text{RPM}$.
+    \item \textbf{Safety Supervisory Envelope Protection:} Enforce critical protection trips including hard rotor overspeed ($\le 1725\,\text{RPM}$), stator thermal limits ($\le 98^\circ\text{C}$), storm cut-out ($v \ge 25\,\text{m/s}$), and structural vibration ($\le 5.5\,\text{mm/s}$).
+    \item \textbf{Automated Verification:} Execute closed-loop automated verification with deterministic traceability.
+\end{enumerate}
+
+\section{Turbine Plant Mathematical Modeling}
+
+\subsection{Rotor Aerodynamics and Power Extraction}
+The aerodynamic power captured by the rotor from hub-height wind speed $v$ is modeled by the standard aerodynamic relationship:
+\begin{equation}
+    P_a = \frac{1}{2} \rho A C_p(\lambda, \beta) v^3
+\end{equation}
+where $\rho = 1.225\,\text{kg/m}^3$ is air density, $R = 52.0\,\text{m}$ is the blade radius, $A = \pi R^2 = 8494.87\,\text{m}^2$ is swept area, and $\lambda$ is the Tip Speed Ratio (TSR) defined as:
+\begin{equation}
+    \lambda = \frac{\omega_r R}{v}
+\end{equation}
+The aerodynamic power coefficient $C_p(\lambda, \beta)$ is given by the empirical nonlinear function:
+\begin{equation}
+    C_p(\lambda, \beta) = 0.5176 \left( \frac{116}{\lambda_i} - 0.4\beta - 5 \right) e^{-\frac{21}{\lambda_i}} + 0.0068\lambda
+\end{equation}
+with:
+\begin{equation}
+    \frac{1}{\lambda_i} = \frac{1}{\lambda + 0.08\beta} - \frac{0.035}{\beta^3 + 1}
+\end{equation}
+The low-speed aerodynamic torque is:
+\begin{equation}
+    T_a = \frac{P_a}{\omega_r}
+\end{equation}
+
+\subsection{Drivetrain Rotational Dynamics}
+The drivetrain is modeled using a lumped equivalent two-mass rotational dynamic balance:
+\begin{equation}
+    J_{eq} \frac{d\omega_r}{dt} = T_a - N_g T_g - B_{dt} \omega_r - T_{brake}
+\end{equation}
+where $J_{eq} = J_r + N_g^2 J_g$ is total equivalent drivetrain inertia, $N_g = 95.0$ is the gearbox ratio, $T_g$ is generator electromagnetic counter-torque, $B_{dt}$ is drivetrain viscous damping, and $T_{brake}$ is mechanical disc brake torque.
+
+\subsection{Thermal and Structural Vibration Dynamics}
+Thermal stator heating and ambient convective cooling are modeled by:
+\begin{equation}
+    \frac{dT_g}{dt} = k_{heat} P_{loss} - k_{cool} (T_g - T_{amb})
+\end{equation}
+where $P_{loss} = P_a - P_e$. Structural nacelle vibration $V$ incorporates baseline mechanical excitation, turbulent aerodynamic thrust, and mass unbalance:
+\begin{equation}
+    V = V_{base} + k_{thrust} v^{1.5} + k_{unbalance} \left(\frac{\omega_r - \omega_{rated}}{\omega_{rated}}\right)^2 + V_{spike}
+\end{equation}
+
+\section{Controller Architecture and State Machine}
+The TurbineGuard controller coordinates multi-region aerodynamic regulation with a finite state machine:
+\begin{itemize}
+    \item \textbf{PARKED:} Rotor locked by mechanical brake ($T_{brake} = 1.2\,\text{MNm}$, $\beta = 90^\circ$).
+    \item \textbf{STARTING:} Pitch slews toward $0^\circ$ at $6^\circ/\text{s}$ while monitoring cut-in wind speed.
+    \item \textbf{NORMAL:} Active Region 2 MPPT torque control ($T_g = k_{opt} \omega_g^2$) and Region 3 Pitch PID regulation.
+    \item \textbf{DERATED:} Power demand throttled to $65\%$ ($1625\,\text{kW}$) in response to high temperature ($85^\circ\text{C} \le T_g < 98^\circ\text{C}$).
+    \item \textbf{FAULT / EMERGENCY\_STOP:} Hard trip latching, high-speed emergency feathering ($12^\circ/\text{s}$), and mechanical braking.
+\end{itemize}
+
+\section{Safety Limits and Protection Thresholds}
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Protection Parameter} & \textbf{Warning Level} & \textbf{Trip Limit} & \textbf{Action} \\ \midrule
+Generator Speed & $1620\,\text{RPM}$ & $1725\,\text{RPM}$ & Latched EMERGENCY\_STOP ($\le 250\,\text{ms}$) \\
+Generator Temp & $85.0^\circ\text{C}$ & $98.0^\circ\text{C}$ & Protective SHUTDOWN \\
+Wind Speed & $22.0\,\text{m/s}$ & $25.0\,\text{m/s}$ & Storm Cut-Out Feathering \\
+Nacelle Vibration & $3.5\,\text{mm/s}$ & $5.5\,\text{mm/s}$ & FAULT Trip \\
+Sensor Data & --- & $\text{NaN / Bus Loss}$ & Failsafe FAULT Mode \\ \bottomrule
+\end{tabular}
+\caption{Configurable Safety Protective Trip Thresholds.}
+\end{table}
+
+\section{Conclusion and Disclaimer}
+This simulation platform demonstrates rigorous engineering validation, automated software testing, and fault containment architectures. It is developed for academic, educational, and portfolio evaluation purposes.
+
+\end{document}

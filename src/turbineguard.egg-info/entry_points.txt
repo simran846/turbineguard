@@ -1,0 +1,3 @@
+[console_scripts]
+turbineguard-demo = scripts.demo_interview:main
+turbineguard-validate = scripts.run_validation_suite:main

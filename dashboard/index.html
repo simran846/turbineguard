@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TurbineGuard &bull; Wind Turbine Controller Validation Platform</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navbar -->
+        <header class="navbar">
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>TurbineGuard <span class="badge-tag">HIL / SIM V1.0</span></h1>
+                    <p class="subtitle">Wind Turbine Controller Validation &amp; Automated Verification Platform</p>
+                </div>
+            </div>
+            
+            <div class="nav-actions">
+                <div class="status-indicator">
+                    <span class="status-dot pulse" id="connectionDot"></span>
+                    <span id="connectionText">API: Online (20Hz)</span>
+                </div>
+                <div class="candidate-tag">
+                    <span>Portfolio Reference: Kumari Simran</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Grid Layout -->
+        <main class="dashboard-grid">
+            <!-- Left Column: Turbine Plant & Live Gauges -->
+            <section class="card plant-card">
+                <div class="card-header">
+                    <h2>Live Turbine Dynamics</h2>
+                    <span class="state-pill state-normal" id="statePill">NORMAL</span>
+                </div>
+
+                <!-- Live Digital Gauges Grid -->
+                <div class="gauge-grid">
+                    <div class="gauge-card">
+                        <span class="gauge-label">Wind Inflow</span>
+                        <div class="gauge-value" id="valWind">11.5 <span class="unit">m/s</span></div>
+                        <div class="gauge-bar"><div class="fill" id="barWind" style="width: 46%;"></div></div>
+                    </div>
+                    <div class="gauge-card">
+                        <span class="gauge-label">Generator Speed</span>
+                        <div class="gauge-value" id="valGenSpeed">1498 <span class="unit">RPM</span></div>
+                        <div class="gauge-bar"><div class="fill green" id="barGenSpeed" style="width: 86%;"></div></div>
+                    </div>
+                    <div class="gauge-card">
+                        <span class="gauge-label">Blade Pitch Angle</span>
+                        <div class="gauge-value" id="valPitch">2.4 <span class="unit">&deg;</span></div>
+                        <div class="gauge-bar"><div class="fill yellow" id="barPitch" style="width: 5%;"></div></div>
+                    </div>
+                    <div class="gauge-card">
+                        <span class="gauge-label">Electrical Power</span>
+                        <div class="gauge-value" id="valPower">2485 <span class="unit">kW</span></div>
+                        <div class="gauge-bar"><div class="fill blue" id="barPower" style="width: 99%;"></div></div>
+                    </div>
+                    <div class="gauge-card">
+                        <span class="gauge-label">Generator Temp</span>
+                        <div class="gauge-value" id="valTemp">68.5 <span class="unit">&deg;C</span></div>
+                        <div class="gauge-bar"><div class="fill" id="barTemp" style="width: 68%;"></div></div>
+                    </div>
+                    <div class="gauge-card">
+                        <span class="gauge-label">Nacelle Vibration</span>
+                        <div class="gauge-value" id="valVib">1.15 <span class="unit">mm/s</span></div>
+                        <div class="gauge-bar"><div class="fill green" id="barVib" style="width: 20%;"></div></div>
+                    </div>
+                </div>
+
+                <!-- Real-time Canvas Graph -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <span>Speed (RPM) &amp; Blade Pitch (&deg;) Live Response</span>
+                        <div class="chart-legend">
+                            <span class="leg-item"><span class="leg-dot green"></span> Gen RPM</span>
+                            <span class="leg-item"><span class="leg-dot yellow"></span> Pitch Angle</span>
+                            <span class="leg-item"><span class="leg-dot red"></span> Trip (1725)</span>
+                        </div>
+                    </div>
+                    <canvas id="telemetryCanvas" width="580" height="200"></canvas>
+                </div>
+
+                <!-- Simulation Control Toolbar -->
+                <div class="sim-toolbar">
+                    <select id="windScenarioSelect" class="form-select">
+                        <option value="constant">Constant Rated Wind (11.5 m/s)</option>
+                        <option value="step">Step Wind Change (10 &rarr; 15 m/s)</option>
+                        <option value="gust">Extreme Operating Gust (IEC EOG)</option>
+                        <option value="turbulent">IEC Turbulent Spectrum</option>
+                        <option value="high_wind_cutout">High Wind Cutout (&gt;25 m/s)</option>
+                    </select>
+                    <button class="btn btn-primary" id="btnRunSim">Run Scenario</button>
+                    <button class="btn btn-outline" id="btnResetSim">Reset Plant</button>
+                </div>
+            </section>
+
+            <!-- Middle Column: Fault Injection Control -->
+            <section class="card fault-card">
+                <div class="card-header">
+                    <h2>Fault Injection Engine</h2>
+                    <span class="badge-count" id="faultCountBadge">11 Types</span>
+                </div>
+                <p class="section-desc">Inject perturbations to test protective trips, safety limits, and fault containment latency.</p>
+
+                <div class="fault-controls">
+                    <div class="form-group">
+                        <label>Select Injected Failure Mode</label>
+                        <select id="faultTypeSelect" class="form-select">
+                            <option value="RotorOverspeed">Critical Rotor Overspeed (Trip &gt;1725 RPM)</option>
+                            <option value="GeneratorOverheat">Generator Stator Thermal Overheat (&gt;98&deg;C)</option>
+                            <option value="CommunicationFailure">Loss of Sensor Bus Communication</option>
+                            <option value="VibrationSpike">Structural Vibration Exceedance (&gt;5.5 mm/s)</option>
+                            <option value="InvalidSensorValue">Invalid / Corrupt Sensor Value (NaN)</option>
+                            <option value="SensorRotorSpeedFailure">Rotor Speed Encoder Dropout</option>
+                            <option value="ExcessiveWind">Extreme Storm Gust Cut-Out</option>
+                            <option value="StaleSensorData">Frozen / Stale Sensor Buffer</option>
+                            <option value="PitchActuatorStuck">Pitch Actuator Seizure</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Severity</label>
+                            <select id="faultSeveritySelect" class="form-select">
+                                <option value="CRITICAL">CRITICAL</option>
+                                <option value="HIGH" selected>HIGH</option>
+                                <option value="MEDIUM">MEDIUM</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Duration (s)</label>
+                            <input type="number" id="faultDurationInput" class="form-input" value="4.0" step="0.5" min="0.5" max="30.0">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-danger btn-block" id="btnInjectFault">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                        Inject Fault Scenario
+                    </button>
+                </div>
+
+                <!-- Fault Verification History -->
+                <div class="fault-results-box" id="faultResultsBox">
+                    <div class="fault-result-header">
+                        <span>Fault Reaction Audit</span>
+                        <span id="faultReactionBadge" class="badge-mini">IDLE</span>
+                    </div>
+                    <div class="fault-log-content" id="faultLogContent">
+                        Ready. Click "Inject Fault Scenario" to observe real-time controller trip and containment.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Column: Automated Validation Suite -->
+            <section class="card validation-card">
+                <div class="card-header">
+                    <h2>Automated Verification Engine</h2>
+                    <button class="btn btn-success btn-sm" id="btnRunValidation">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        Validate All (12 REQs)
+                    </button>
+                </div>
+
+                <!-- KPI Metric Stats -->
+                <div class="val-kpi-row">
+                    <div class="val-kpi">
+                        <span class="val-kpi-num green" id="kpiPass">12</span>
+                        <span class="val-kpi-label">PASSED</span>
+                    </div>
+                    <div class="val-kpi">
+                        <span class="val-kpi-num red" id="kpiFail">0</span>
+                        <span class="val-kpi-label">FAILED</span>
+                    </div>
+                    <div class="val-kpi">
+                        <span class="val-kpi-num blue" id="kpiRate">100%</span>
+                        <span class="val-kpi-label">PASS RATE</span>
+                    </div>
+                </div>
+
+                <!-- Requirements List -->
+                <div class="req-list" id="reqList">
+                    <div class="req-item pass">
+                        <span class="req-badge">REQ-001</span>
+                        <span class="req-title">Rotor Speed Tracking (Region 2)</span>
+                        <span class="status-tag pass">PASS</span>
+                    </div>
+                    <div class="req-item pass">
+                        <span class="req-badge">REQ-002</span>
+                        <span class="req-title">Rated Power Pitch Regulation (Region 3)</span>
+                        <span class="status-tag pass">PASS</span>
+                    </div>
+                    <div class="req-item pass">
+                        <span class="req-badge">REQ-003</span>
+                        <span class="req-title">Rotor Overspeed Hard Trip (&le;250ms)</span>
+                        <span class="status-tag pass">PASS</span>
+                    </div>
+                    <div class="req-item pass">
+                        <span class="req-badge">REQ-004</span>
+                        <span class="req-title">Storm Cut-Out Feathering (&gt;25 m/s)</span>
+                        <span class="status-tag pass">PASS</span>
+                    </div>
+                    <div class="req-item pass">
+                        <span class="req-badge">REQ-005</span>
+                        <span class="req-title">Generator Overheat Trip (&ge;98&deg;C)</span>
+                        <span class="status-tag pass">PASS</span>
+                    </div>
+                    <div class="req-item pass">
+                        <span class="req-badge">REQ-006</span>
+                        <span class="req-title">Thermal Warning Power Derating (65%)</span>
+                        <span class="status-tag pass">PASS</span>
+                    </div>
+                    <div class="req-item pass">
+                        <span class="req-badge">REQ-007</span>
+                        <span class="req-title">Vibration Trip (&ge;5.5 mm/s)</span>
+                        <span class="status-tag pass">PASS</span>
+                    </div>
+                    <div class="req-item pass">
+                        <span class="req-badge">REQ-008</span>
+                        <span class="req-title">Sensor NaN Failsafe Protection</span>
+                        <span class="status-tag pass">PASS</span>
+                    </div>
+                    <div class="req-item pass">
+                        <span class="req-badge">REQ-009</span>
+                        <span class="req-title">Communication Bus Loss Failsafe</span>
+                        <span class="status-tag pass">PASS</span>
+                    </div>
+                    <div class="req-item pass">
+                        <span class="req-badge">REQ-010</span>
+                        <span class="req-title">Pitch Slew Rate Limit Compliance</span>
+                        <span class="status-tag pass">PASS</span>
+                    </div>
+                    <div class="req-item pass">
+                        <span class="req-badge">REQ-011</span>
+                        <span class="req-title">Auto Fault Recovery Hysteresis</span>
+                        <span class="status-tag pass">PASS</span>
+                    </div>
+                    <div class="req-item pass">
+                        <span class="req-badge">REQ-012</span>
+                        <span class="req-title">Extreme Operating Gust (EOG) Stability</span>
+                        <span class="status-tag pass">PASS</span>
+                    </div>
+                </div>
+
+                <!-- Report Action Links -->
+                <div class="report-links">
+                    <a href="/reports/latest" target="_blank" class="report-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        View HTML Validation Report
+                    </a>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p><strong>TurbineGuard Test Platform</strong> &bull; Siemens Gamesa Renewable Power Pvt Ltd Technology Portfolio</p>
+            <p>Candidate: Kumari Simran &bull; B.Tech Computer Engineering &bull; CMR University Bangalore</p>
+        </footer>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

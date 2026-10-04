@@ -1,0 +1,13 @@
+Requirement_ID,Title,Status,Measured_Value,Expected_Value,Tolerance,Unit,Execution_Time_ms,Diagnostic_Message
+REQ-001,Rotor Speed Regulation in Region 2,PASSED,1373.4046632301988,1100.0,400.0,RPM,6.046599999535829,Measured 1373.405 within target 1100.000 +/- 400.000 (Diff: 273.405)
+REQ-002,Rated Power Regulation in Region 3,PASSED,2499.8031883003955,2500.0,125.0,kW,8.611700000074052,Measured 2499.803 <= Limit 2500.000 (Tolerance: +125.000)
+REQ-003,Critical Rotor Overspeed Hard Trip,PASSED,50.00000000000071,250.0,50.0,ms,4.309500000090338,Detected in 50.0ms (Limit: 250ms). State: EMERGENCY_STOP.
+REQ-004,High Wind Cut-Out Storm Shutdown,PASSED,89.99999999992686,90.0,5.0,deg,12.585899999976391,"State: SHUTDOWN, Pitch: 90.0 deg"
+REQ-005,Generator Thermal Overheat Protective Trip,PASSED,49.99999999999982,1000.0,200.0,ms,4.597599999215163,Detected in 50.0ms (Limit: 1000ms). State: SHUTDOWN.
+REQ-006,Thermal High-Warning Power Derating,PASSED,1625.0,1625.0,50.0,kW,0.023499999770137947,"State: DERATED, Demanded Power: 1625.0 kW"
+REQ-007,Structural Vibration Trip,PASSED,100.00000000000009,300.0,100.0,ms,3.8453000006484217,Detected in 100.0ms (Limit: 300ms). State: FAULT.
+REQ-008,Sensor Data Integrity and Failsafe,PASSED,50.00000000000027,200.0,100.0,ms,3.62440000026254,Detected in 50.0ms (Limit: 200ms). State: FAULT.
+REQ-009,Communication Bus Loss Protection,PASSED,50.00000000000027,500.0,100.0,ms,3.170500000123866,Detected in 50.0ms (Limit: 500ms). State: FAULT.
+REQ-010,Pitch Actuator Normal Rate Limiting,PASSED,8.000000000000007,8.0,0.1,deg/s,8.11870000052295,Measured 8.000 <= Limit 8.000 (Tolerance: +0.100)
+REQ-011,Automatic Fault Recovery Hysteresis,PASSED,5.0,5.0,0.5,s,0.4169000003457768,Auto recovery triggered at t=5.00s (Required hold: 5.0s)
+REQ-012,Extreme Operating Gust (EOG) Dynamic Stability,PASSED,1516.956313737276,1725.0,0.0,RPM,13.217100000474602,Measured 1516.956 <= Limit 1725.000 (Tolerance: +0.000)
